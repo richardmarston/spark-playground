@@ -15,15 +15,24 @@ import static spark.Spark.*;
 
 public class Main{
 
-    private static String readFile(String pathname) throws IOException {
+    private static class Reader {
+        private static String readFile(String pathname) throws IOException {
 
-        Main instance = new Main();
-        Scanner scanner = new Scanner(instance.getClass().getClassLoader().getResourceAsStream(pathname));
-        try {
-            return scanner.useDelimiter("\\A").next();
-        } finally {
-            System.out.println("Closing file.");
-            scanner.close();
+            Reader instance = new Reader();
+            Scanner scanner = new Scanner(instance.getClass().getClassLoader().getResourceAsStream(pathname));
+            try {
+                return scanner.useDelimiter("\\A").next();
+            } finally {
+                scanner.close();
+            }
+        }
+    }
+
+    private static class Writer {
+        private static void writeFile(String filename, String contents) throws IOException {
+            FileWriter fileWriter = new FileWriter(filename);
+            fileWriter.write(contents);
+            fileWriter.close();
         }
     }
 
@@ -40,19 +49,14 @@ public class Main{
         String templated = writer.toString();
 
         get("index.html", (request, response) -> {
-            String result = readFile( "index.html" );
-            FileWriter fileWriter = new FileWriter("/tmp/fileAsString");
-            fileWriter.write(result);
-            fileWriter.close();
+            String result = Reader.readFile( "index.html" );
+            Writer.writeFile( "/tmp/index.html", result );
             return result;
         });
         
         get("css/:name", (request, response) -> {
-            String result = readFile( "css/"+request.params(":name") );
-            System.out.println(request.params(":name")+" requested.");
-            FileWriter fileWriter = new FileWriter("/tmp/fileAsString"+request.params(":name"));
-            fileWriter.write(result);
-            fileWriter.close();
+            String result = Reader.readFile( "css/"+request.params(":name") );
+            Writer.writeFile( "/tmp/"+request.params(":name"), result );
             return result;
         });
 
