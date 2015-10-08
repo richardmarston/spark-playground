@@ -48,17 +48,12 @@ public class Main{
         t.merge( context, writer );
         String templated = writer.toString();
 
+        staticFileLocation("/public");
+
         get("index.html", (request, response) -> {
             String result = Reader.readFile( "index.html" );
             Writer.writeFile( "/tmp/index.html", result );
             return result;
         });
-        
-        get("css/:name", (request, response) -> {
-            String result = Reader.readFile( "css/"+request.params(":name") );
-            Writer.writeFile( "/tmp/"+request.params(":name"), result );
-            return result;
-        });
-
     }
 }
